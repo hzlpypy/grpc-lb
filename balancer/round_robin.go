@@ -13,7 +13,7 @@ const RoundRobin = "round_robin_x"
 
 // newRoundRobinBuilder creates a new roundrobin balancer builder.
 func newRoundRobinBuilder() balancer.Builder {
-	return base.NewBalancerBuilder(RoundRobin, &roundRobinPickerBuilder{}, base.Config{HealthCheck: true})
+	return base.NewBalancerBuilderV2(RoundRobin, &roundRobinPickerBuilder{}, base.Config{HealthCheck: true})
 }
 
 func init() {
@@ -22,11 +22,11 @@ func init() {
 
 type roundRobinPickerBuilder struct{}
 
-func (*roundRobinPickerBuilder) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
+func (*roundRobinPickerBuilder) Build(buildInfo base.PickerBuildInfo) balancer.V2Picker {
 	grpclog.Infof("roundrobinPicker: newPicker called with buildInfo: %v", buildInfo)
 
 	if len(buildInfo.ReadySCs) == 0 {
-		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+		return base.NewErrPickerV2(balancer.ErrNoSubConnAvailable)
 	}
 	var scs []balancer.SubConn
 	for subConn, subConnInfo := range buildInfo.ReadySCs {
@@ -48,7 +48,7 @@ type roundRobinPicker struct {
 	next     int
 }
 
-func (p *roundRobinPicker) Pick(balancer.PickInfo) (balancer.PickResult, error) {
+func (p *roundRobinPicker) Pick(b balancer.PickInfo) (balancer.PickResult, error) {
 	ret := balancer.PickResult{}
 	p.mu.Lock()
 	ret.SubConn = p.subConns[p.next]

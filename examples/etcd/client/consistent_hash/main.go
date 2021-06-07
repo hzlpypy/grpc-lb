@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	etcd "github.com/coreos/etcd/client"
+	etcd "go.etcd.io/etcd/client"
 	"github.com/liyue201/grpc-lb/balancer"
 	"github.com/liyue201/grpc-lb/examples/proto"
 	registry "github.com/liyue201/grpc-lb/registry/etcd"

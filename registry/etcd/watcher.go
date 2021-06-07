@@ -2,7 +2,7 @@ package etcd
 
 import (
 	"encoding/json"
-	etcd_cli "github.com/coreos/etcd/client"
+	etcd_cli "go.etcd.io/etcd/client"
 	"github.com/liyue201/grpc-lb/registry"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/grpclog"

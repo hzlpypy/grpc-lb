@@ -1,7 +1,7 @@
 package etcd
 
 import (
-	etcd_cli "github.com/coreos/etcd/client"
+	etcd_cli "go.etcd.io/etcd/client"
 	"google.golang.org/grpc/resolver"
 	"sync"
 )

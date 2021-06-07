@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	etcdv3 "github.com/coreos/etcd/clientv3"
+	etcdv3 "go.etcd.io/etcd/clientv3"
 	"github.com/liyue201/grpc-lb/common"
 	"github.com/liyue201/grpc-lb/examples/proto"
 	"github.com/liyue201/grpc-lb/registry"
@@ -62,7 +62,7 @@ func (s *RpcServer) Say(ctx context.Context, req *proto.SayReq) (*proto.SayResp,
 
 func StartService() {
 	etcdConfg := etcdv3.Config{
-		Endpoints: []string{"http://10.0.101.68:2379"},
+		Endpoints: []string{"http://127.0.0.1:2379"},
 	}
 
 	service := &registry.ServiceInfo{
@@ -88,6 +88,7 @@ func StartService() {
 
 	wg.Add(1)
 	go func() {
+		// start service
 		server.Run()
 		wg.Done()
 	}()

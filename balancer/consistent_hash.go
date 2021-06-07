@@ -18,17 +18,17 @@ func InitConsistentHashBuilder(consistanceHashKey string) {
 
 // newConsistanceHashBuilder creates a new ConsistanceHash balancer builder.
 func newConsistentHashBuilder(consistentHashKey string) balancer.Builder {
-	return base.NewBalancerBuilder(ConsistentHash, &consistentHashPickerBuilder{consistentHashKey}, base.Config{HealthCheck: true})
+	return base.NewBalancerBuilderV2(ConsistentHash, &consistentHashPickerBuilder{consistentHashKey}, base.Config{HealthCheck: true})
 }
 
 type consistentHashPickerBuilder struct {
 	consistentHashKey string
 }
 
-func (b *consistentHashPickerBuilder) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
+func (b *consistentHashPickerBuilder) Build(buildInfo base.PickerBuildInfo) balancer.V2Picker {
 	grpclog.Infof("consistentHashPicker: newPicker called with buildInfo: %v", buildInfo)
 	if len(buildInfo.ReadySCs) == 0 {
-		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+		return base.NewErrPickerV2(balancer.ErrNoSubConnAvailable)
 	}
 
 	picker := &consistentHashPicker{

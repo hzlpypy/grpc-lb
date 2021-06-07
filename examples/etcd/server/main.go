@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	etcd_cli "github.com/coreos/etcd/client"
+	etcd_cli "go.etcd.io/etcd/client"
 	"github.com/liyue201/grpc-lb/common"
 	"github.com/liyue201/grpc-lb/examples/proto"
 	"github.com/liyue201/grpc-lb/registry"

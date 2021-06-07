@@ -1,7 +1,7 @@
 package etcd
 
 import (
-	etcd_cli "github.com/coreos/etcd/clientv3"
+	etcd_cli "go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc/resolver"
 	"sync"
 )
@@ -16,6 +16,7 @@ type etcdResolver struct {
 }
 
 func (r *etcdResolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+	// conn etcd3
 	etcdCli, err := etcd_cli.New(r.etcdConfig)
 	if err != nil {
 		return nil, err
@@ -35,6 +36,7 @@ func (r *etcdResolver) start() {
 	go func() {
 		defer r.wg.Done()
 		out := r.watcher.Watch()
+		// 更新状态
 		for addr := range out {
 			r.cc.UpdateState(resolver.State{Addresses: addr})
 		}

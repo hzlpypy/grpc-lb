@@ -14,7 +14,7 @@ const LeastConnection = "least_connection_x"
 
 // newLeastConnectionBuilder creates a new leastConnection balancer builder.
 func newLeastConnectionBuilder() balancer.Builder {
-	return base.NewBalancerBuilder(LeastConnection, &leastConnectionPickerBuilder{}, base.Config{HealthCheck: true})
+	return base.NewBalancerBuilderV2(LeastConnection, &leastConnectionPickerBuilder{}, base.Config{HealthCheck: true})
 }
 
 func init() {
@@ -23,11 +23,11 @@ func init() {
 
 type leastConnectionPickerBuilder struct{}
 
-func (*leastConnectionPickerBuilder) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
+func (*leastConnectionPickerBuilder) Build(buildInfo base.PickerBuildInfo) balancer.V2Picker {
 	grpclog.Infof("leastConnectionPicker: newPicker called with buildInfo: %v", buildInfo)
 
 	if len(buildInfo.ReadySCs) == 0 {
-		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+		return base.NewErrPickerV2(balancer.ErrNoSubConnAvailable)
 	}
 
 	var nodes []*Node

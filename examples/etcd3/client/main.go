@@ -1,7 +1,7 @@
 package main
 
 import (
-	etcd3 "github.com/coreos/etcd/clientv3"
+	etcd3 "go.etcd.io/etcd/clientv3"
 	"github.com/liyue201/grpc-lb/balancer"
 	"github.com/liyue201/grpc-lb/examples/proto"
 	registry "github.com/liyue201/grpc-lb/registry/etcd3"
@@ -13,11 +13,12 @@ import (
 
 func main() {
 	etcdConfg := etcd3.Config{
-		Endpoints: []string{"http://10.0.101.68:2379"},
+		Endpoints: []string{"http://127.0.0.1:2379"},
 	}
 	registry.RegisterResolver("etcd3", etcdConfg, "/backend/services", "test", "1.0")
 
 	c, err := grpc.Dial("etcd3:///", grpc.WithInsecure(), grpc.WithBalancerName(balancer.RoundRobin))
+	//c, err := grpc.Dial("etcd3:///", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("grpc dial: %s", err)
 		return
