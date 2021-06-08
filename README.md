@@ -14,9 +14,9 @@ package main
 
 import (
 	etcd "go.etcd.io/etcd/client"
-	"github.com/liyue201/grpc-lb/balancer"
-	"github.com/liyue201/grpc-lb/examples/proto"
-	registry "github.com/liyue201/grpc-lb/registry/etcd"
+	"github.com/hzlpypy/grpc-lb/balancer"
+	"github.com/hzlpypy/grpc-lb/examples/proto"
+	registry "github.com/hzlpypy/grpc-lb/registry/etcd"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"log"

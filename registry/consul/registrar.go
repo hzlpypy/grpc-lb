@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	consul "github.com/hashicorp/consul/api"
-	"github.com/liyue201/grpc-lb/registry"
+	"github.com/hzlpypy/grpc-lb/registry"
 	"google.golang.org/grpc/grpclog"
 	"sync"
 	"time"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/liyue201/grpc-lb/registry"
+	"github.com/hzlpypy/grpc-lb/registry"
 	"github.com/samuel/go-zookeeper/zk"
 	"google.golang.org/grpc/grpclog"
 	"strings"

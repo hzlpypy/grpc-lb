@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	etcd3 "go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-	"github.com/liyue201/grpc-lb/registry"
+	"github.com/hzlpypy/grpc-lb/registry"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/resolver"

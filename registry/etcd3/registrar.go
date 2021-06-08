@@ -5,7 +5,7 @@ import (
 	"fmt"
 	etcd3 "go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/liyue201/grpc-lb/registry"
+	"github.com/hzlpypy/grpc-lb/registry"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/grpclog"
 	"sync"

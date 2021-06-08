@@ -2,9 +2,9 @@ package main
 
 import (
 	con_api "github.com/hashicorp/consul/api"
-	"github.com/liyue201/grpc-lb/balancer"
-	"github.com/liyue201/grpc-lb/examples/proto"
-	"github.com/liyue201/grpc-lb/registry/consul"
+	"github.com/hzlpypy/grpc-lb/balancer"
+	"github.com/hzlpypy/grpc-lb/examples/proto"
+	"github.com/hzlpypy/grpc-lb/registry/consul"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"log"

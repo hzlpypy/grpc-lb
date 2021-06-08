@@ -1,4 +1,4 @@
-module github.com/liyue201/grpc-lb
+module github.com/hzlpypy/grpc-lb
 
 go 1.16
 
