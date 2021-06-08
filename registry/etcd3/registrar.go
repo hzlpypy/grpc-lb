@@ -65,7 +65,7 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 	r.Unlock()
 	ttl := int64(r.conf.Ttl / time.Second)
 	insertFunc := func() error {
-		//设置租约时间
+		// 设置租约时间
 		resp, err := r.etcd3Client.Grant(ctx, ttl)
 		if err != nil {
 			fmt.Printf("[Register] %v\n", err.Error())
@@ -99,6 +99,20 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 	if err != nil {
 		return err
 	}
+	// Deprecated.  Will be removed in a future 1.x release.
+	//ticker := time.NewTicker(r.conf.Ttl / 5)
+	//for {
+	//	select {
+	//	case <-ticker.C:
+	//		insertFunc()
+	//	case <-ctx.Done():
+	//		ticker.Stop()
+	//		if _, err := r.etcd3Client.Delete(context.Background(), key); err != nil {
+	//			grpclog.Infof("grpclb: deregister '%s' failed: %s", key, err.Error())
+	//		}
+	//		return nil
+	//	}
+	//}
 
 	return nil
 }
