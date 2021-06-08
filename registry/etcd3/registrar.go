@@ -3,30 +3,41 @@ package etcd
 import (
 	"encoding/json"
 	"fmt"
-	etcd3 "go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 	"github.com/hzlpypy/grpc-lb/registry"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/grpclog"
 	"sync"
 	"time"
 )
 
+//创建租约注册服务
+type ServiceReg struct {
+	lease         clientv3.Lease
+	leaseResp     *clientv3.LeaseGrantResponse
+	canclefunc    func()
+	keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse
+	key           string
+}
+
+
 type Registrar struct {
 	sync.RWMutex
 	conf        *Config
-	etcd3Client *etcd3.Client
+	etcd3Client *clientv3.Client
 	canceler    map[string]context.CancelFunc
+	serviceReg  ServiceReg
 }
 
 type Config struct {
-	EtcdConfig  etcd3.Config
+	EtcdConfig  clientv3.Config
 	RegistryDir string
 	Ttl         time.Duration
 }
 
 func NewRegistrar(conf *Config) (*Registrar, error) {
-	client, err := etcd3.New(conf.EtcdConfig)
+	client, err := clientv3.New(conf.EtcdConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +57,16 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 	}
 
 	key := r.conf.RegistryDir + "/" + service.Name + "/" + service.Version + "/" + service.InstanceId
+	fmt.Println(key+"\n")
 	value := string(val)
 	ctx, cancel := context.WithCancel(context.Background())
 	r.Lock()
 	r.canceler[service.InstanceId] = cancel
 	r.Unlock()
-
+	ttl := int64(r.conf.Ttl / time.Second)
 	insertFunc := func() error {
-		resp, err := r.etcd3Client.Grant(ctx, int64(r.conf.Ttl/time.Second))
+		//设置租约时间
+		resp, err := r.etcd3Client.Grant(ctx, ttl)
 		if err != nil {
 			fmt.Printf("[Register] %v\n", err.Error())
 			return err
@@ -61,7 +74,7 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 		_, err = r.etcd3Client.Get(ctx, key)
 		if err != nil {
 			if err == rpctypes.ErrKeyNotFound {
-				if _, err := r.etcd3Client.Put(ctx, key, value, etcd3.WithLease(resp.ID)); err != nil {
+				if _, err := r.etcd3Client.Put(ctx, key, value, clientv3.WithLease(resp.ID)); err != nil {
 					grpclog.Infof("grpclb: set key '%s' with ttl to etcd3 failed: %s", key, err.Error())
 				}
 			} else {
@@ -70,11 +83,15 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 			return err
 		} else {
 			// refresh set to true for not notifying the watcher
-			if _, err := r.etcd3Client.Put(ctx, key, value, etcd3.WithLease(resp.ID)); err != nil {
+			if _, err := r.etcd3Client.Put(ctx, key, value, clientv3.WithLease(resp.ID)); err != nil {
 				grpclog.Infof("grpclb: refresh key '%s' with ttl to etcd3 failed: %s", key, err.Error())
 				return err
 			}
 		}
+		if err := r.setLease(resp); err != nil {
+			return  err
+		}
+		go r.ListenLeaseRespChan()
 		return nil
 	}
 
@@ -83,21 +100,47 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 		return err
 	}
 
-	ticker := time.NewTicker(r.conf.Ttl / 5)
-	for {
-		select {
-		case <-ticker.C:
-			insertFunc()
-		case <-ctx.Done():
-			ticker.Stop()
-			if _, err := r.etcd3Client.Delete(context.Background(), key); err != nil {
-				grpclog.Infof("grpclb: deregister '%s' failed: %s", key, err.Error())
-			}
-			return nil
-		}
+	return nil
+}
+
+//设置租约
+func (r *Registrar) setLease(leaseResp *clientv3.LeaseGrantResponse) error {
+	//lease := clientv3.NewLease(this.etcd3Client)
+
+	//设置租约时间
+	//leaseResp, err := this.etcd3Client.Grant(context.TODO(), timeNum)
+	//if err != nil {
+	//	return err
+	//}
+
+	//设置续租
+	ctx, cancelFunc := context.WithCancel(context.TODO())
+	leaseRespChan, err := r.etcd3Client.KeepAlive(ctx, leaseResp.ID)
+
+	if err != nil {
+		return err
 	}
 
+	r.serviceReg.lease = r.etcd3Client
+	r.serviceReg.leaseResp = leaseResp
+	r.serviceReg.canclefunc = cancelFunc
+	r.serviceReg.keepAliveChan = leaseRespChan
 	return nil
+}
+
+//监听 续租情况
+func (this *Registrar) ListenLeaseRespChan() {
+	for {
+		select {
+		case leaseKeepResp := <-this.serviceReg.keepAliveChan:
+			if leaseKeepResp == nil {
+				fmt.Printf("已经关闭续租功能\n")
+				return
+			} else {
+				fmt.Printf("续租成功\n")
+			}
+		}
+	}
 }
 
 func (r *Registrar) Unregister(service *registry.ServiceInfo) error {
