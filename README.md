@@ -1,4 +1,5 @@
 # grpc-lb
+# 可当作名字服务，获取指定组件的套接字
 This is a gRPC load balancing library for go.
 
  ![](/architecture.png)
