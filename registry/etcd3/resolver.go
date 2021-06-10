@@ -22,7 +22,7 @@ func (r *etcdResolver) Build(target resolver.Target, cc resolver.ClientConn, opt
 		return nil, err
 	}
 	r.cc = cc
-	r.watcher = newWatcher(r.etcdWatchPath, etcdCli)
+	r.watcher = NewWatcher(r.etcdWatchPath, etcdCli)
 	r.start()
 	return r, nil
 }

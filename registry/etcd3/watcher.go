@@ -24,7 +24,7 @@ func (w *Watcher) Close() {
 	w.cancel()
 }
 
-func newWatcher(key string, cli *etcd3.Client) *Watcher {
+func NewWatcher(key string, cli *etcd3.Client) *Watcher {
 	ctx, cancel := context.WithCancel(context.Background())
 	w := &Watcher{
 		key:    key,
