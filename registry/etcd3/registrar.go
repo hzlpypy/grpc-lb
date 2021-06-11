@@ -25,7 +25,7 @@ type ServiceReg struct {
 type Registrar struct {
 	sync.RWMutex
 	conf        *Config
-	etcd3Client *clientv3.Client
+	Etcd3Client *clientv3.Client
 	canceler    map[string]context.CancelFunc
 	serviceReg  ServiceReg
 }
@@ -43,7 +43,7 @@ func NewRegistrar(conf *Config) (*Registrar, error) {
 	}
 
 	registry := &Registrar{
-		etcd3Client: client,
+		Etcd3Client: client,
 		conf:        conf,
 		canceler:    make(map[string]context.CancelFunc),
 	}
@@ -66,15 +66,15 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 	ttl := int64(r.conf.Ttl / time.Second)
 	insertFunc := func() error {
 		// 设置租约时间
-		resp, err := r.etcd3Client.Grant(ctx, ttl)
+		resp, err := r.Etcd3Client.Grant(ctx, ttl)
 		if err != nil {
 			fmt.Printf("[Register] %v\n", err.Error())
 			return err
 		}
-		_, err = r.etcd3Client.Get(ctx, key)
+		_, err = r.Etcd3Client.Get(ctx, key)
 		if err != nil {
 			if err == rpctypes.ErrKeyNotFound {
-				if _, err := r.etcd3Client.Put(ctx, key, value, clientv3.WithLease(resp.ID)); err != nil {
+				if _, err := r.Etcd3Client.Put(ctx, key, value, clientv3.WithLease(resp.ID)); err != nil {
 					grpclog.Infof("grpclb: set key '%s' with ttl to etcd3 failed: %s", key, err.Error())
 				}
 			} else {
@@ -83,7 +83,7 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 			return err
 		} else {
 			// refresh set to true for not notifying the watcher
-			if _, err := r.etcd3Client.Put(ctx, key, value, clientv3.WithLease(resp.ID)); err != nil {
+			if _, err := r.Etcd3Client.Put(ctx, key, value, clientv3.WithLease(resp.ID)); err != nil {
 				grpclog.Infof("grpclb: refresh key '%s' with ttl to etcd3 failed: %s", key, err.Error())
 				return err
 			}
@@ -107,7 +107,7 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 	//		insertFunc()
 	//	case <-ctx.Done():
 	//		ticker.Stop()
-	//		if _, err := r.etcd3Client.Delete(context.Background(), key); err != nil {
+	//		if _, err := r.Etcd3Client.Delete(context.Background(), key); err != nil {
 	//			grpclog.Infof("grpclb: deregister '%s' failed: %s", key, err.Error())
 	//		}
 	//		return nil
@@ -119,23 +119,23 @@ func (r *Registrar) Register(service *registry.ServiceInfo) error {
 
 //设置租约
 func (r *Registrar) setLease(leaseResp *clientv3.LeaseGrantResponse) error {
-	//lease := clientv3.NewLease(this.etcd3Client)
+	//lease := clientv3.NewLease(this.Etcd3Client)
 
 	//设置租约时间
-	//leaseResp, err := this.etcd3Client.Grant(context.TODO(), timeNum)
+	//leaseResp, err := this.Etcd3Client.Grant(context.TODO(), timeNum)
 	//if err != nil {
 	//	return err
 	//}
 
 	//设置续租
 	ctx, cancelFunc := context.WithCancel(context.TODO())
-	leaseRespChan, err := r.etcd3Client.KeepAlive(ctx, leaseResp.ID)
+	leaseRespChan, err := r.Etcd3Client.KeepAlive(ctx, leaseResp.ID)
 
 	if err != nil {
 		return err
 	}
 
-	r.serviceReg.lease = r.etcd3Client
+	r.serviceReg.lease = r.Etcd3Client
 	r.serviceReg.leaseResp = leaseResp
 	r.serviceReg.canclefunc = cancelFunc
 	r.serviceReg.keepAliveChan = leaseRespChan
@@ -169,5 +169,5 @@ func (r *Registrar) Unregister(service *registry.ServiceInfo) error {
 }
 
 func (r *Registrar) Close() {
-	r.etcd3Client.Close()
+	r.Etcd3Client.Close()
 }
