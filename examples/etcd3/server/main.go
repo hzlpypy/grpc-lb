@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	etcdv3 "go.etcd.io/etcd/clientv3"
+	etcdv3 "github.com/ozonru/etcd/v3/clientv3"
 	"github.com/hzlpypy/grpc-lb/common"
 	"github.com/hzlpypy/grpc-lb/examples/proto"
 	"github.com/hzlpypy/grpc-lb/registry"

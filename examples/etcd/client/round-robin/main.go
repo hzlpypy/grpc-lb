@@ -1,7 +1,7 @@
 package main
 
 import (
-	etcd "go.etcd.io/etcd/client"
+	etcd "github.com/ozonru/etcd/v3/client"
 	"github.com/hzlpypy/grpc-lb/balancer"
 	"github.com/hzlpypy/grpc-lb/examples/proto"
 	registry "github.com/hzlpypy/grpc-lb/registry/etcd"

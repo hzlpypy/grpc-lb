@@ -2,9 +2,9 @@ package etcd
 
 import (
 	"encoding/json"
-	etcd3 "go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"github.com/hzlpypy/grpc-lb/registry"
+	etcd3 "github.com/ozonru/etcd/v3/clientv3"
+	"github.com/ozonru/etcd/v3/mvcc/mvccpb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/resolver"
